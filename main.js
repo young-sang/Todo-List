@@ -14,6 +14,11 @@ num = 0;
 // create
 
 addBtn.addEventListener("click", () => {
+
+    if(addList.value == ''){
+        return;
+    }
+
     const tr = document.createElement("tr");
     const tdName = document.createElement("td");
     const tdId = document.createElement("td");
@@ -59,8 +64,14 @@ addBtn.addEventListener("click", () => {
 })
 
 updateBtn.addEventListener("click", () => {
-
-
+    const tr = document.querySelectorAll('.id');
+    console.log(tr.length);
+    for(i = 0; i < tr.length; i++ ){
+        if(tr[i].value == updateId.value){
+            const a = tr[i].parentElement.parentElement.querySelector('.listName');
+            a.innerText = updateList.value;
+        }
+    }
     modal.style.display = "none";
     updateList.value = '';
 })
