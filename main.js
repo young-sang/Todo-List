@@ -23,7 +23,7 @@ const make = (data) => {
     tdId.innerHTML = `<input type="hidden" value=${data.id} class="id"/>`;
     tdName.innerText = data.value;
     tdName.className = "listName"
-    tdCheckBox.innerHTML = `<input type="checkbox" value=${data.done}/>`;
+    tdCheckBox.innerHTML = `<input type="checkbox" class="chk" />`;    
     tdUpdateBtn.innerHTML = '<input type="button" class="update"  value="수정"/>';
     tdDeleteBtn.innerHTML = '<input type="button" class="delete" value="삭제" />';
     tdDate.innerText = data.date;
@@ -36,6 +36,8 @@ const make = (data) => {
     tr.appendChild(tdDate);
     todoBox.insertBefore(tr, todoBox.firstChild)
 
+    
+    tdCheckBox.querySelector('.chk').checked = data.done;
 
     // UPDATE
     tdUpdateBtn.addEventListener('click', (e) => {
@@ -47,6 +49,28 @@ const make = (data) => {
         updateList.value = targetText.innerText;
         modal.style.display = "block";
     })
+
+    // checkBox Update
+    tdCheckBox.addEventListener('click', (e) => {
+        const tr = e.target.parentElement.parentElement;
+        
+        // 화면 변경
+        let id = tr.querySelector(".id").value;
+        
+        // DB 수정
+        list = list.map(item => {
+            if(item && item.id === Number(id)){
+                return {
+                    ...item,
+                    done: e.target.checked
+                };
+            }
+            return item;
+        });
+        localStorage.setItem("list", JSON.stringify(list));
+    })
+    
+
 
     // DELETE
     tdDeleteBtn.addEventListener('click', (e) => {
