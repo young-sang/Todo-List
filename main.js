@@ -34,7 +34,7 @@ const make = (data) => {
     tr.appendChild(tdUpdateBtn);
     tr.appendChild(tdDeleteBtn);
     tr.appendChild(tdDate);
-    todoBox.appendChild(tr);
+    todoBox.insertBefore(tr, todoBox.firstChild)
 
 
     // UPDATE
@@ -50,17 +50,28 @@ const make = (data) => {
 
     // DELETE
     tdDeleteBtn.addEventListener('click', (e) => {
-        const tr = e.target.parentElement.parentElement;
+        let tr = e.target.parentElement.parentElement;
+        let idTd = tr.querySelector(".id");
+        console.log(idTd);
+        let id = idTd.value;
 
+        // 프론트엔드 삭제
         tr.remove();
+        console.log(id);
+        // DB 삭제
+        list = list.filter((e) => e.id !== Number(id));
+        localStorage.setItem("list", JSON.stringify(list));
     })
 }
+
+
 
 //Read
 let list = JSON.parse(localStorage.getItem("list"));
 console.log(list)
+
 if(list == null){
-    list = []  
+    list = []
 }else{
     for(let i = 0; i < list.length; i++){
         make(list[i])
@@ -68,23 +79,26 @@ if(list == null){
 }
 
 
-
-
-
 //create
 addBtn.addEventListener("click", () => {
     if(addList.value == ''){
         return;
     };
-    let date = new Date()
+
+    // 데이터 가공
+    let date = new Date();
     let data = {
-        'id' : list == null ? 1 : list.length + 1,
+        'id' : list == null || list.length == 0 ? 1 : list[list.length -1].id + 1,
         'value' : addList.value,
         'done' : false,
         'date' : date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate()
     }
+
+    // 프론트엔드 추가
     make(data);
     addList.value = "";
+
+    // DB 작성
     list.push(data)
     localStorage.setItem("list", JSON.stringify(list))
 });
@@ -92,12 +106,26 @@ addBtn.addEventListener("click", () => {
 
 //수정 버튼 제출
 updateSubmitBtn.addEventListener("click", () => {
-    const tr = document.querySelectorAll('.id');
-    console.log(tr.length);
-    for(i = 0; i < tr.length; i++ ){
-        if(tr[i].value == updateId.value){
-            const a = tr[i].parentElement.parentElement.querySelector('.listName');
-            a.innerText = updateList.value;
+    const idInputTag = document.querySelectorAll('.id');
+    
+    for(i = 0; i < idInputTag.length; i++ ){
+        if(idInputTag[i].value == updateId.value){
+            // 화면 변경
+            const tr = idInputTag[i].parentElement.parentElement.querySelector('.listName');
+            let id = idInputTag[i].value;
+            tr.innerText = updateList.value;
+            
+            // DB 수정
+            list = list.map(item => {
+                if(item && item.id === Number(id)){
+                    return {
+                        ...item,
+                        value: updateList.value
+                    };
+                }
+                return item;
+            });
+            localStorage.setItem("list", JSON.stringify(list));
         }
     }
     modal.style.display = "none";
